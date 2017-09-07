@@ -100,6 +100,16 @@ fi
   # Make npm output to STDOUT instead of its default STDERR
   npm install --userconfig $build_dir/.npmrc 2>&1 | indent
 )
+composer() {
+    /app/.heroku/php-min/bin/php /app/.heroku/php/bin/composer "$@"
+}
+export -f composer
+
+status "--------- Composer -------------"
+echo $composer
+
+#composer config --global discard-changes true
+#composer install --no-interaction --no-dev
 
 # Persist goodies like node-version in the slug
 mkdir -p $build_dir/.heroku
@@ -158,9 +168,19 @@ echo "export PATH=\"\$HOME/vendor/node/bin:\$HOME/bin:\$HOME/node_modules/.bin:\
     # make sure that grunt and grunt-cli are installed locally
     npm install grunt-cli
     npm install grunt
+    npm install bower
     echo "-----> Found Gruntfile, running grunt heroku:$NODE_ENV task"
-    $build_dir/node_modules/.bin/grunt heroku:$NODE_ENV
-
+    ls -la /app/.heroku/php/bin
+    pwd
+    echo $build_dir
+    ls -la $build_dir/node_modules/.bin
+    export BUILD_DIR=$build_dir
+    #$build_dir/node_modules/.bin/bower install ./backend
+    #cat ./frontend/bower.json
+    # $build_dir/node_modules/.bin/bower install ./frontend --config.interactive=true
+    #$build_dir/node_modules/.bin/bower install ./frontend
+    #$build_dir/node_modules/.bin/node-sass precision=10, outputStyle="compressed", includePaths=["backend/includes/vendor/foundation/scss","backend/includes/vendor/admin-theme/src/scss"] 
+    $build_dir/node_modules/.bin/grunt heroku:$NODE_ENV --build_dir=$build_dir
     status "Pruning dev dependencies"
     npm prune --production 2>&1 | indent
 
